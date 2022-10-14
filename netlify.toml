@@ -1,2 +1,6 @@
 [build]
-  functions = "functions"
+  command = "npm run build"
+  publish = "src"
+  functions = "lambda"
+  NODE_ENV = "10.15.3"
+  NPM_VERSION = "6.9.0"
