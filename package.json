@@ -10,7 +10,7 @@
   "dependencies": {
     "@babel/runtime": "^7.6.3",
     "dotenv": "^7.0.0",
-    "stripe": "^6.36.0",
+    "stripe": "^8.131.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {

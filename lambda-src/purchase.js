@@ -5,16 +5,16 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const statusCode = 200;
 const headers = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type"
+  "Access-Control-Allow-Headers": "Content-Type",
 };
 
-exports.handler = async function(event) {
+exports.handler = async function (event) {
   // We only care to do anything if this is our POST request.
   if (event.httpMethod !== "POST") {
     return {
       statusCode,
       headers,
-      body: "This was not a POST request!"
+      body: "This was not a POST request!",
     };
   }
 
@@ -22,7 +22,7 @@ exports.handler = async function(event) {
   const data = JSON.parse(event.body);
 
   // Make sure we have all required data. Otherwise, get outta here.
-  if (!data.token || !data.amount || !data.idempotency_key) {
+  if (!data.description || !data.amount || !data.id || !data.description) {
     const message = "Required information is missing!";
 
     console.error(message);
@@ -32,26 +32,28 @@ exports.handler = async function(event) {
       headers,
       body: JSON.stringify({
         status: "failed",
-        message
-      })
+        message,
+      }),
     };
   }
 
-  let charge;
-
+  let { amount, currency, description, id } = data;
   try {
-    charge = await stripe.charges.create(
-      {
-        currency: "usd",
-        amount: data.amount,
-        source: data.token.id,
-        receipt_email: data.token.email,
-        description: `charge for a widget`
-      },
-      {
-        idempotency_key: data.idempotency_key
-      }
-    );
+    const payment = await stripe.paymentIntents.create({
+      amount,
+      currency,
+      description,
+      payment_method: id,
+    });
+    console.log("Payment", payment);
+    res.json({ payment });
+    return {
+      statusCode,
+      headers,
+      body: JSON.stringify({
+        payment,
+      }),
+    };
   } catch (e) {
     console.error(e.message);
 
@@ -60,20 +62,8 @@ exports.handler = async function(event) {
       headers,
       body: JSON.stringify({
         status: "failed",
-        message: e.message
-      })
+        message: e.message,
+      }),
     };
   }
-
-  const status =
-    charge === null || charge.status !== "succeeded" ? "failed" : charge.status;
-
-  return {
-    statusCode,
-    headers,
-    body: JSON.stringify({
-      status,
-      message: "Charge successfully created!"
-    })
-  };
 };
