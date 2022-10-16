@@ -44,6 +44,7 @@ exports.handler = async function (event) {
       currency,
       description,
       payment_method: id,
+      confirm: true
     });
     console.log("Payment", payment);
     // res.json({ payment });
