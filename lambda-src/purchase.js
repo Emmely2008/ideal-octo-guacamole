@@ -46,7 +46,7 @@ exports.handler = async function (event) {
       payment_method: id,
     });
     console.log("Payment", payment);
-    res.json({ payment });
+    // res.json({ payment });
     return {
       statusCode,
       headers,
